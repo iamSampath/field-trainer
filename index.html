@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Field Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an open two-page field manual lying on a pavilion-green desk. Words on the left leaf, a living field diagram on the right. On phones the leaves stack, field first. */
+:root{
+  --desk:#23392e; --desk-ink:#e9efe6; --desk-line:rgba(233,239,230,.28);
+  --paper:#f5f7f2; --paper-2:#e8eee3; --ink:#1c2a23; --ink-2:#56645c; --rule:#d2dbcd;
+  --gutter:rgba(28,42,35,.16); --shadow:rgba(8,20,14,.38);
+  --ball:#a3241b; --on-ball:#fff7f2; --seam:#f3e3d0;
+  --grass:#cfe2c2; --grass-2:#c3d9b4; --rope:#6f8f62; --pitch:#e3d6b4;
+  --fielder:#1f4d3a; --ok:#1d7a3e; --ok-bg:#e1f1e5; --bad:#b3261e; --hl:#d98e1f;
+  --display:"Zilla Slab", Rockwell, "Roboto Slab", Georgia, serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --desk:#0e1511; --desk-ink:#d9e2d6; --desk-line:rgba(217,226,214,.22);
+  --paper:#1b231e; --paper-2:#151c18; --ink:#e4ebe2; --ink-2:#9fb0a5; --rule:#304037;
+  --gutter:rgba(0,0,0,.5); --shadow:rgba(0,0,0,.6);
+  --ball:#e0655a; --on-ball:#1a100e; --seam:#3a1a16;
+  --grass:#1f3023; --grass-2:#243828; --rope:#5d7f54; --pitch:#4d4533;
+  --fielder:#9fe0bd; --ok:#5cc983; --ok-bg:#17301f; --bad:#ff7a70; --hl:#f0b050;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --desk:#0e1511; --desk-ink:#d9e2d6; --desk-line:rgba(217,226,214,.22);
+  --paper:#1b231e; --paper-2:#151c18; --ink:#e4ebe2; --ink-2:#9fb0a5; --rule:#304037;
+  --gutter:rgba(0,0,0,.5); --shadow:rgba(0,0,0,.6);
+  --ball:#e0655a; --on-ball:#1a100e; --seam:#3a1a16;
+  --grass:#1f3023; --grass-2:#243828; --rope:#5d7f54; --pitch:#4d4533;
+  --fielder:#9fe0bd; --ok:#5cc983; --ok-bg:#17301f; --bad:#ff7a70; --hl:#f0b050;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:18px 32px}
+.shell{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;color:var(--desk-ink)}
+.brand{font:700 20px/1 var(--display);display:flex;align-items:center;gap:8px}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:2px}
+.tab{font:500 11.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--desk-ink);background:transparent;border:1px solid var(--desk-line);border-radius:999px;padding:8px 11px;cursor:pointer;white-space:nowrap;opacity:.8}
+.tab:hover{opacity:1}
+.tab[aria-current="true"]{background:var(--desk-ink);color:var(--desk);border-color:var(--desk-ink);opacity:1}
+
+.book{position:relative;perspective:2600px}
+.spread{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;box-shadow:0 2px 0 var(--paper-2),0 4px 0 var(--rule),0 24px 44px var(--shadow)}
+.page{position:relative;min-width:0;min-height:660px;padding:24px 34px 50px;display:flex;flex-direction:column;gap:14px;background:var(--paper)}
+.page.left{border-radius:12px 0 0 12px;background:linear-gradient(to left,var(--gutter),transparent 40px),var(--paper)}
+.page.right{border-radius:0 12px 12px 0;background:linear-gradient(to right,var(--gutter),transparent 40px),var(--paper)}
+.rh{display:flex;justify-content:space-between;gap:10px;font:500 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.folio{position:absolute;bottom:18px;font:500 12px/1 var(--mono);color:var(--ink-2)}
+.left .folio{left:34px}.right .folio{right:34px}
+
+.eyebrow{margin:6px 0 0;font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ball)}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;line-height:1.02;text-wrap:balance;color:var(--ink)}
+h1{font-size:clamp(52px,7.4vw,84px);letter-spacing:-.01em}
+h2{font-size:clamp(30px,3.4vw,38px)}
+.lead{margin:0;max-width:58ch}
+.small{font-size:14px;color:var(--ink-2);margin:0}
+
+.plist{list-style:none;margin:0;padding:0;display:grid}
+.pitem{width:100%;display:grid;grid-template-columns:16px 1fr;gap:10px;align-items:center;text-align:left;background:transparent;border:0;border-bottom:1px dashed var(--rule);padding:8px 6px;cursor:pointer;color:var(--ink);font:inherit;border-radius:6px 6px 0 0;transition:background .2s}
+.pitem:hover{background:var(--paper-2)}
+.pitem .sw{width:10px;height:10px;border-radius:50%;background:var(--fielder);justify-self:center;transition:transform .25s,background .25s}
+.pitem .sw.sq{border-radius:2px;background:var(--hl)}
+.pitem b{font-weight:600}
+.pitem .s{color:var(--ink-2);font-size:14px;margin-left:8px}
+.pitem[aria-pressed="true"]{background:var(--paper-2)}
+.pitem[aria-pressed="true"] .sw{background:var(--hl);transform:scale(1.5)}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip,.btn{font:600 14px/1 var(--body);padding:10px 14px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;transition:background .2s,color .2s,transform .1s}
+.chip:active,.btn:active{transform:scale(.97)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary{background:var(--ball);border-color:var(--ball);color:var(--on-ball)}
+.btn.big{padding:14px 18px;font-size:15px}
+:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+
+.fieldhost{width:100%;max-width:470px;margin:0 auto}
+svg.field{width:100%;height:auto;display:block}
+.cap{border-top:1px solid var(--rule);padding-top:10px;min-height:104px;display:grid;align-content:start;gap:4px}
+.cap.fresh{animation:rise .35s ease}
+.cap .fig{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.cap .nm{font:700 23px/1.1 var(--display)}
+.cap p{margin:0;font-size:15px;max-width:60ch}
+.note{border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink-2);background:var(--paper-2);margin:0}
+
+.toc{list-style:none;margin:6px 0 0;padding:0;display:grid}
+.toc button{display:flex;align-items:baseline;gap:10px;width:100%;background:none;border:0;border-bottom:1px solid var(--rule);padding:10px 2px;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+.toc button:hover .t{color:var(--ball)}
+.toc .no{font:500 12px/1 var(--mono);color:var(--ball);width:18px}
+.toc .t{font:600 17px/1.2 var(--body);transition:color .2s}
+.toc .dots{flex:1;border-bottom:1px dotted var(--ink-2);opacity:.45;transform:translateY(-4px)}
+.toc .pg{font:500 13px/1 var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+.score{display:flex;gap:22px;font:500 12px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.score b{display:block;font:700 26px/1.1 var(--display);letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
+.score b.bump{animation:bump .4s ease}
+.prompt{font:700 23px/1.2 var(--display);min-height:58px;margin:0}
+.prompt em{font-style:normal;color:var(--ball)}
+.prompt .ok{color:var(--ok)}.prompt .bad{color:var(--bad)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choices button{padding:13px 10px;border-radius:10px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:600 15px/1.2 var(--body);cursor:pointer;animation:rise .3s ease backwards}
+.choices button:nth-child(2){animation-delay:.05s}.choices button:nth-child(3){animation-delay:.1s}.choices button:nth-child(4){animation-delay:.15s}
+.choices button:hover{background:var(--paper-2)}
+.choices button.right{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+.choices button.wrong{border-color:var(--bad);color:var(--bad);animation:shake .35s}
+
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--desk-ink)}
+.pbtn{font:600 14px/1 var(--body);color:var(--desk-ink);background:transparent;border:1px solid var(--desk-line);border-radius:999px;padding:11px 16px;cursor:pointer;max-width:42%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbtn:hover{background:var(--desk-line)}
+.pbtn:disabled{opacity:.3;cursor:default;background:transparent}
+.count{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8;font-variant-numeric:tabular-nums;text-align:center}
+
+/* field drawing */
+.g-out{fill:var(--grass);stroke:var(--rope);stroke-width:2.5}
+.mow rect{fill:var(--grass-2)}
+.g-in{fill:none;stroke:var(--rope);stroke-width:1.2;stroke-dasharray:5 5}
+.pitch{fill:var(--pitch)}
+.crease{stroke:var(--paper);stroke-width:1.3}
+.stp{fill:var(--ball)}
+.bowler circle{fill:var(--ball);stroke:var(--paper);stroke-width:1.5}
+.bowler text,.sidelbl{font:500 11px var(--mono);fill:var(--ink-2);letter-spacing:.08em;text-transform:uppercase}
+.zone{fill:var(--hl);opacity:.26;animation:zin .5s ease}
+.f{cursor:pointer;transition:transform .85s cubic-bezier(.2,.75,.2,1),opacity .45s}
+.f .hit{fill:transparent}
+.f .body{fill:var(--fielder);stroke:var(--paper);stroke-width:1.5;transform-box:fill-box;transform-origin:center;transition:transform .25s,fill .25s}
+.f .ring{fill:none;stroke:var(--hl);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.f text{font:600 11.5px var(--body);fill:var(--ink);paint-order:stroke;stroke:var(--grass);stroke-width:3.5px;stroke-linejoin:round;opacity:0;transition:opacity .25s;pointer-events:none}
+.f:hover .body{transform:scale(1.2)}
+.f.show text{opacity:1}
+.f.sel .body,.f.hl .body{fill:var(--hl);transform:scale(1.4)}
+.f.sel .ring,.f.hl .ring{animation:pulse 1.4s ease-out infinite}
+.f.ok .body{fill:var(--ok);transform:scale(1.4)}
+.f.ok .ring{stroke:var(--ok);animation:pulse 1s ease-out 2}
+.f.bad .body{fill:var(--bad)}
+.f:focus-visible{outline:none}.f:focus-visible .body{stroke:var(--hl);stroke-width:3}
+.ball{fill:var(--ball);stroke:var(--seam);stroke-width:1;transition:transform .6s cubic-bezier(.25,.6,.3,1),opacity .35s}
+
+/* page turn */
+.ov{position:absolute;z-index:4;pointer-events:none;margin:0}
+.leaf{z-index:5;transform-style:preserve-3d}
+.face{position:absolute;inset:0;min-height:0!important;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.back{transform:rotateY(180deg)}
+.face .shade{position:absolute;inset:0;background:var(--shadow);opacity:0;pointer-events:none}
+.ov.page,.ov.spread{min-height:0}
+
+@keyframes pulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(3.2)}}
+@keyframes zin{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+@keyframes bump{40%{transform:scale(1.25)}}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+
+@media (max-width:859px){
+  .spread{grid-template-columns:1fr;gap:12px;box-shadow:none}
+  .page{min-height:0;border-radius:12px!important;padding:18px 18px 46px;box-shadow:0 12px 26px var(--shadow)}
+  .page.left,.page.right{background:var(--paper)}
+  .spread:not(.cover) .page.right{order:-1}
+  .left .folio{left:18px}.right .folio{right:18px}
+  .cap{min-height:0}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="var(--ball)"/><path d="M6.2 2.6c2.2 2.4 2.2 12.4 0 14.8M13.8 2.6c-2.2 2.4-2.2 12.4 0 14.8" stroke="var(--seam)" stroke-width="1.1" fill="none" stroke-dasharray="1.6 1.4"/></svg>
+      Field Trainer
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Chapters"></nav>
+  </header>
+
+  <main class="book" id="book">
+    <div class="spread" id="spread">
+      <section class="page left" id="pL" aria-label="Left page"></section>
+      <section class="page right" id="pR" aria-label="Right page"></section>
+    </div>
+  </main>
+
+  <nav class="pager" aria-label="Turn pages">
+    <button class="pbtn" id="prev"></button>
+    <span class="count" id="count"></span>
+    <button class="pbtn" id="next"></button>
+  </nav>
+</div>
+
+<script>
+const POS=[
+ {n:"Wicketkeeper",x:200,y:282,z:"close",s:"behind the stumps",d:"Stands behind the stumps. Stays back to pace bowling and comes up to the stumps for spin."},
+ {n:"First slip",x:222,y:284,z:"close",s:"fine, off side",d:"Beside the keeper on the off side, waiting for the outside edge."},
+ {n:"Second slip",x:242,y:280,z:"close",s:"fine, off side",d:"Next to first slip and a little wider, for thicker edges."},
+ {n:"Gully",x:268,y:266,z:"close",s:"behind square, off side",d:"Wider than the slips, behind point. Catches thick edges and cuts in the air."},
+ {n:"Leg slip",x:178,y:286,z:"close",s:"fine, leg side",d:"A slip on the leg side, for glances and gloved balls down leg."},
+ {n:"Silly point",x:230,y:238,z:"close",s:"very close, off side",d:"Very close in front of the bat on the off side. Takes bat-pad catches off spin. Wear a helmet."},
+ {n:"Short leg",x:170,y:238,z:"close",s:"very close, leg side",d:"Very close on the leg side. Catches the ball that pops up off bat and pad. Wear a helmet."},
+ {n:"Point",x:284,y:240,z:"ring",s:"square, off side",d:"Level with the batter on the off side, inside the ring. Stops the cut."},
+ {n:"Cover",x:285,y:192,z:"ring",s:"in front of square, off side",d:"In front of square on the off side. Stops drives and saves the quick single."},
+ {n:"Extra cover",x:262,y:158,z:"ring",s:"between cover and mid-off",d:"Fills the gap between cover and mid-off for the off drive."},
+ {n:"Mid-off",x:232,y:136,z:"ring",s:"straight, off side",d:"Off side of the bowler, inside the ring. Stops the straight and off drive."},
+ {n:"Mid-on",x:168,y:136,z:"ring",s:"straight, leg side",d:"Leg side of the bowler, inside the ring. Stops the on drive."},
+ {n:"Midwicket",x:115,y:190,z:"ring",s:"in front of square, leg side",d:"Leg side between mid-on and square leg. Catches the mistimed flick or pull."},
+ {n:"Square leg",x:116,y:242,z:"ring",s:"square, leg side",d:"Level with the batter on the leg side. The square-leg umpire stands in this area too."},
+ {n:"Third man",x:285,y:350,z:"deep",s:"fine, off side, rope",d:"On the rope behind the batter on the off side. Collects edges and late cuts."},
+ {n:"Fine leg",x:115,y:350,z:"deep",s:"fine, leg side, rope",d:"On the rope behind the batter on the leg side. Collects glances and top-edged hooks."},
+ {n:"Deep point",x:366,y:240,z:"deep",s:"square, off side, rope",d:"On the rope, square on the off side. Stops the hard cut."},
+ {n:"Deep cover",x:345,y:140,z:"deep",s:"in front of square, off side, rope",d:"On the rope in front of square on the off side. Guards the lofted cover drive."},
+ {n:"Long-off",x:240,y:52,z:"deep",s:"straight, off side, rope",d:"On the rope, straight, on the off side of the bowler. Waits for the lofted straight hit."},
+ {n:"Long-on",x:160,y:52,z:"deep",s:"straight, leg side, rope",d:"On the rope, straight, on the leg side of the bowler."},
+ {n:"Deep midwicket",x:55,y:140,z:"deep",s:"in front of square, leg side, rope",d:"On the rope in front of square on the leg side. A common landing spot for leg-side slogs."},
+ {n:"Deep square leg",x:34,y:240,z:"deep",s:"square, leg side, rope",d:"On the rope, square on the leg side. Covers the pull and the sweep."}
+];
+const PITCH={x:200,y:215}, BAT={x:200,y:250};
+const EXAMPLE=[0,1,7,8,10,11,12,13,14,15];
+const range=n=>[...Array(n).keys()];
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+let lefty=false;
+
+/* ---------- the field ---------- */
+function makeField(host,opts={}){
+  const NS="http://www.w3.org/2000/svg";
+  let stripes="";for(let y=30;y<410;y+=44)stripes+=`<rect x="0" y="${y}" width="400" height="22"/>`;
+  host.innerHTML=`<svg class="field" viewBox="0 0 400 440" role="img" aria-label="Cricket field. The batter is at the bottom end of the pitch.">
+    <defs><clipPath id="bclip"><circle cx="200" cy="215" r="185"/></clipPath></defs>
+    <circle class="g-out" cx="200" cy="215" r="185"/>
+    <g class="mow" clip-path="url(#bclip)">${stripes}</g>
+    <g class="zones" clip-path="url(#bclip)"></g>
+    <circle class="g-in" cx="200" cy="215" r="95"/>
+    <rect class="pitch" x="190" y="170" width="20" height="90" rx="2"/>
+    <line class="crease" x1="185" y1="182" x2="215" y2="182"/>
+    <line class="crease" x1="185" y1="248" x2="215" y2="248"/>
+    <rect class="stp" x="195" y="172" width="10" height="4" rx="1"/>
+    <rect class="stp" x="195" y="254" width="10" height="4" rx="1"/>
+    <g class="bowler"><circle cx="200" cy="160" r="6"/><text x="189" y="163" text-anchor="end">Bowler</text></g>
+    <text class="sidelbl sl-l" x="10" y="432">Leg side</text>
+    <text class="sidelbl sl-r" x="390" y="432" text-anchor="end">Off side</text>
+    <g class="fl"></g><g class="balls"></g></svg>`;
+  const svg=host.querySelector("svg"),fl=svg.querySelector(".fl"),zones=svg.querySelector(".zones"),balls=svg.querySelector(".balls");
+  const els=new Map();let mir=false,secret=false;
+  const at=i=>({x:mir?400-POS[i].x:POS[i].x,y:POS[i].y});
+  const tr=p=>`translate(${p.x}px,${p.y}px)`;
+  function anchor(g,i){const p=at(i),t=g.querySelector("text");t.setAttribute("y",p.y<70?24:-13);
+    if(p.x<85){t.setAttribute("text-anchor","start");t.setAttribute("x",-10)}
+    else if(p.x>315){t.setAttribute("text-anchor","end");t.setAttribute("x",10)}
+    else{t.setAttribute("text-anchor","middle");t.setAttribute("x",0)}}
+  function mk(i){const g=document.createElementNS(NS,"g");g.setAttribute("class","f");g.setAttribute("tabindex","0");g.setAttribute("role","button");
+    g.setAttribute("aria-label",secret?"Fielder":POS[i].n);
+    g.innerHTML=`<circle class="hit" r="15"/><circle class="ring" r="7"/><circle class="body" r="6.5"/><text>${POS[i].n}</text>`;
+    const fire=()=>opts.onTap&&opts.onTap(i);
+    g.addEventListener("click",fire);
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fire()}});
+    return g}
+  function place(list,delay=0){
+    const keep=new Set(list);
+    for(const [i,g] of [...els]){if(!keep.has(i)){els.delete(i);g.style.transitionDelay="0ms";g.style.opacity="0";g.style.transform=tr(PITCH);setTimeout(()=>g.remove(),850)}}
+    list.forEach((i,k)=>{let g=els.get(i);
+      if(!g){g=mk(i);g.style.transform=tr(PITCH);g.style.opacity="0";fl.appendChild(g);els.set(i,g)}
+      g.style.transitionDelay=(k*45)+"ms";anchor(g,i)});
+    const run=()=>list.forEach(i=>{const g=els.get(i);if(g){g.style.opacity="1";g.style.transform=tr(at(i))}});
+    setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(run)),delay);
+  }
+  function setMirror(m){mir=m;svg.querySelector(".sl-l").textContent=m?"Off side":"Leg side";svg.querySelector(".sl-r").textContent=m?"Leg side":"Off side";
+    let k=0;for(const [i,g] of els){g.style.transitionDelay=(k++*35)+"ms";anchor(g,i);g.style.transform=tr(at(i))}}
+  return{
+    place,setMirror,
+    setSecret(b){secret=b;for(const [i,g] of els)g.setAttribute("aria-label",b?"Fielder":POS[i].n)},
+    cls(i,c,on=true){const g=els.get(i);if(g)g.classList.toggle(c,on)},
+    clear(...c){for(const g of els.values())g.classList.remove(...c)},
+    showAll(on){for(const g of els.values())g.classList.toggle("show",on)},
+    shade(paths){zones.innerHTML=paths.map(d=>`<path class="zone" fill-rule="evenodd" d="${d}"/>`).join("")},
+    ball(i){if(reduced())return;const c=document.createElementNS(NS,"circle");c.setAttribute("class","ball");c.setAttribute("r","4");c.style.transform=tr(BAT);balls.appendChild(c);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.transform=tr(at(i))}));
+      setTimeout(()=>{c.style.opacity="0"},700);setTimeout(()=>c.remove(),1100)}
+  };
+}
+
+function wedge(a,h){const R=330,rad=d=>d*Math.PI/180,p=d=>`${(BAT.x+R*Math.cos(rad(d))).toFixed(1)} ${(BAT.y+R*Math.sin(rad(d))).toFixed(1)}`;
+  return `M${BAT.x} ${BAT.y} L${p(a-h)} A${R} ${R} 0 0 1 ${p(a+h)} Z`}
+const circ=(cx,cy,r)=>`M${cx-r} ${cy} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0 Z`;
+const ZONES={
+ off:{t:"Off side",s:"the side the batter faces",d:"The side the batter faces in the stance. For a right-hander it is the right half of this map.",p:["M200 0 H400 V440 H200 Z"],ex:[7,8,10,14,17]},
+ leg:{t:"Leg side",s:"also called the on side",d:"The side behind the batter's legs, also called the on side. For a right-hander it is the left half of this map.",p:["M0 0 H200 V440 H0 Z"],ex:[11,12,13,15,20]},
+ ring:{t:"Inner ring",s:"the circle round the pitch",d:"The marked circle around the pitch, drawn here as a simple circle. In ODI and T20 cricket it sits 30 yards from each set of stumps. Fielders here save singles.",p:[circ(200,215,95)],ex:[7,8,9,10,11,12,13]},
+ deep:{t:"Deep or long",s:"out near the rope",d:"Out near the boundary rope. A name with deep or long in it puts the fielder here to stop fours and take the big catch.",p:[circ(200,215,185)+" "+circ(200,215,95)],ex:[14,15,16,17,18,19,20,21]},
+ straight:{t:"Straight",s:"in line with the pitch, in front",d:"In front of the batter, in line with the pitch. Mid-off, mid-on, long-off and long-on stand straight.",p:[wedge(-90,18)],ex:[10,11,18,19]},
+ square:{t:"Square",s:"level with the batter",d:"Level with the batter, at right angles to the pitch. Point and square leg are square, and so are their deep versions.",p:[wedge(0,14),wedge(180,14)],ex:[7,13,16,21]},
+ fine:{t:"Fine",s:"behind, close to the pitch line",d:"Behind the batter, close to the line of the pitch. Slips, third man and fine leg are fine.",p:[wedge(90,45)],ex:[1,2,4,14,15]},
+ close:{t:"Short or silly",s:"close to the bat",d:"Close to the bat. Silly means very close, as in silly point. These fielders wait for bat-pad catches.",p:[circ(200,252,42)],ex:[0,5,6]}
+};
+
+/* ---------- page helpers ---------- */
+function fieldBlock(fig,nm,d,chips){
+  return `<div class="fieldhost" id="fh"></div>
+  <div class="cap" id="cap"><span class="fig" id="capf">${fig}</span><span class="nm" id="capn">${nm}</span><p id="capd">${d}</p></div>
+  ${chips?`<div class="row"><button class="chip" id="names" aria-pressed="false">Show all names</button><button class="chip" id="replay">Run them in again</button></div>`:""}`}
+function setCap(fig,nm,d){const c=$("#cap");if(!c)return;$("#capf").textContent=fig;$("#capn").textContent=nm;$("#capd").textContent=d;c.classList.remove("fresh");void c.offsetWidth;c.classList.add("fresh")}
+function pressList(i){$$(".pitem").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.i===String(i))))}
+
+function chapter(no,tab,title,lead,idx){
+  return{tab,title:`Chapter ${no} · ${title}`,
+    left:()=>`<p class="eyebrow">Chapter ${no}</p><h2>${title}</h2><p class="lead">${lead}</p>
+      <ul class="plist">${idx.map(i=>`<li><button class="pitem" data-i="${i}" aria-pressed="false"><span class="sw"></span><span><b>${POS[i].n}</b><span class="s">${POS[i].s}</span></span></button></li>`).join("")}</ul>`,
+    right:()=>fieldBlock(`Fig. ${no+1}`,"Tap a fielder or a name","Each fielder runs to his spot. Tap one to see where he stands and what he is there for. A ball flies to whoever you pick.",true),
+    init(delay){
+      let names=false;
+      const F=makeField($("#fh"),{onTap:sel});F.place(idx,delay);
+      function sel(i){F.clear("sel");if(!names)F.showAll(false);F.cls(i,"sel");F.cls(i,"show");F.ball(i);pressList(i);setCap(`Fig. ${no+1} · ${POS[i].s}`,POS[i].n,POS[i].d)}
+      $$(".pitem").forEach(b=>b.onclick=()=>sel(+b.dataset.i));
+      $("#names").onclick=e=>{names=!names;e.currentTarget.setAttribute("aria-pressed",names);F.showAll(names)};
+      $("#replay").onclick=()=>{F.place([]);setTimeout(()=>{F.place(idx);if(names)setTimeout(()=>F.showAll(true),50)},700)};
+    }}
+}
+
+/* ---------- the pages ---------- */
+const PAGES=[
+ {tab:"Cover",title:"Contents",
+  left:()=>`<p class="eyebrow">A captain's pocket manual</p><h1>Field<br>Trainer</h1>
+   <p class="lead">Learn where each of 22 fielding positions stands, what it is for, and how the field flips for a left-hander. Turn the pages, tap the fielders, then test yourself in the practice nets.</p>
+   <ol class="toc">${PAGES.slice(1).map((p,k)=>`<li><button data-go="${k+1}"><span class="no">${k+1}</span><span class="t">${p.tab==="Practice"?"Practice nets":p.title.split(" · ")[1]}</span><span class="dots"></span><span class="pg">${(k+1)*2+1}</span></button></li>`).join("")}</ol>
+   <p class="small">Turn pages with the buttons below, the ← → keys, or a swipe.</p>`,
+  right:()=>fieldBlock("Fig. 1 · An example field","A basic field for a right-hander","Keeper and one slip, six fielders in the ring and two on the rope, plus the bowler. Tap any fielder to learn the name.",false),
+  init(delay){
+    const F=makeField($("#fh"),{onTap:i=>{F.clear("sel");F.showAll(false);F.cls(i,"sel");F.cls(i,"show");F.ball(i);setCap(`Fig. 1 · ${POS[i].s}`,POS[i].n,POS[i].d)}});
+    F.place(EXAMPLE,delay);
+    $$(".toc button").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+  }},
+ {tab:"Ground",title:"Chapter 1 · Reading the ground",
+  left:()=>`<p class="eyebrow">Chapter 1</p><h2>Reading the ground</h2>
+   <p class="lead">Every position name is built from a few words. Once you know them, most names explain themselves. Deep point is simply point, moved back to the rope.</p>
+   <ul class="plist">${Object.entries(ZONES).map(([k,z])=>`<li><button class="pitem" data-z="${k}" aria-pressed="false"><span class="sw sq"></span><span><b>${z.t}</b><span class="s">${z.s}</span></span></button></li>`).join("")}</ul>
+   <p class="note">How many fielders may stand outside the ring, and in which overs, differs between leagues. Check your league's playing conditions before you set a field.</p>`,
+  right:()=>fieldBlock("Fig. 2","Tap a word to light up its part of the ground","The shaded area shows where that word applies. A few fielders run in to show positions that carry the word.",false),
+  init(delay){
+    const F=makeField($("#fh"));
+    const pick=k=>{const z=ZONES[k];F.shade(z.p);F.clear("show");F.place(z.ex,0);setTimeout(()=>z.ex.forEach(i=>F.cls(i,"show")),450);
+      $$(".pitem").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.z===k)));setCap("Fig. 2 · "+z.s,z.t,z.d)};
+    $$(".pitem").forEach(b=>b.onclick=()=>pick(b.dataset.z));
+    setTimeout(()=>pick("off"),delay);
+  }},
+ chapter(2,"Close catchers","Close catchers","These fielders stand near the bat and wait for edges and bat-pad chances. An attacking field uses more of them.",[0,1,2,3,4,5,6]),
+ chapter(3,"The ring","The ring","The inner ring saves singles. These seven stand inside the circle, from square on the off side round to square on the leg side.",[7,8,9,10,11,12,13]),
+ chapter(4,"Boundary","The boundary","Boundary riders stop fours and take the catch when the batter goes big. Most share a name with the ring position in front of them, with deep or long added.",[14,15,16,17,18,19,20,21]),
+ {tab:"Left-handers",title:"Chapter 5 · Left-handers",
+  left:()=>`<p class="eyebrow">Chapter 5</p><h2>When a left-hander walks in</h2>
+   <p class="lead">The whole field mirrors. The off side moves to the left of the map, so point, cover, gully and the slips all cross over. Press the button and watch everyone run.</p>
+   <div class="row"><button class="btn primary big" id="flip">Switch to a left-handed batter</button></div>
+   <p class="note">Agree on one short call with your team, such as "lefty, mirror", so everyone crosses together and nobody is left in the wrong half.</p>
+   <div style="display:grid;gap:8px"><p class="prompt" id="q5">Quick check. For a left-hander, which side of this map is third man on?</p>
+   <div class="choices" id="c5"><button data-a="left">Left</button><button data-a="right">Right</button></div></div>`,
+  right:()=>fieldBlock("Fig. 6","Right-handed batter","The same basic field as the cover page. Names stay on so you can follow each fielder across.",false),
+  init(delay){
+    const F=makeField($("#fh"));F.setMirror(lefty);F.place(EXAMPLE,delay);setTimeout(()=>F.showAll(true),delay+900);
+    const btn=$("#flip");
+    const label=()=>{btn.textContent=lefty?"Switch to a right-handed batter":"Switch to a left-handed batter";
+      setCap("Fig. 6",lefty?"Left-handed batter":"Right-handed batter",lefty?"Off side is now on the left. Third man and the slips have crossed to the left of the keeper.":"Off side is on the right. Slips, point and third man stand to the right of the keeper.")};
+    label();
+    btn.onclick=()=>{lefty=!lefty;F.setMirror(lefty);label()};
+    $$("#c5 button").forEach(b=>b.onclick=()=>{
+      $$("#c5 button").forEach(x=>x.classList.remove("right","wrong"));
+      const ok=b.dataset.a==="left";b.classList.add(ok?"right":"wrong");
+      if(!ok)$('#c5 button[data-a="left"]').classList.add("right");
+      $("#q5").innerHTML=ok?'<span class="ok">Right.</span> Third man is fine on the off side, and a left-hander\'s off side is the left.':'<span class="bad">Not quite.</span> Third man is on the off side, and a left-hander\'s off side is the left.';
+      if(!lefty){lefty=true;F.setMirror(true);label()}
+      F.clear("sel");F.cls(14,"sel");
+    });
+  }},
+ {tab:"Practice",title:"Chapter 6 · Practice nets",
+  left:()=>`<p class="eyebrow">Chapter 6</p><h2>Practice nets</h2>
+   <div class="row" role="group" aria-label="Practice mode"><button class="chip" data-m="name">Name it</button><button class="chip" data-m="find">Find it</button><button class="chip" data-m="random">Random field</button></div>
+   <div class="row"><button class="chip" id="hand" aria-pressed="false">Left-handed batter</button></div>
+   <div class="score"><span>Score<b id="sc">0/0</b></span><span>Streak<b id="st">0</b></span><span>Best streak<b id="bs">0</b></span></div>
+   <p class="prompt" id="pr" aria-live="polite"></p>
+   <div class="choices" id="ch"></div>
+   <div class="row"><button class="btn primary" id="nx">Next ball</button><button class="chip" id="all" hidden>Show all names</button></div>`,
+  right:()=>fieldBlock("Fig. 7","Pick a mode and start","Name it highlights a fielder and gives you four names. Find it names a position and you tap the dot. Random field sets a new field each ball.",false),
+  init(delay){
+    let mode="name",target=null,locked=false,sc={r:0,t:0,s:0,best:0};
+    try{sc.best=+localStorage.getItem("ft-best")||0}catch(e){}
+    const F=makeField($("#fh"),{onTap:tap});F.setMirror(lefty);
+    const pr=$("#pr"),ch=$("#ch"),all=$("#all");
+    const hand=$("#hand");hand.setAttribute("aria-pressed",lefty);
+    function bump(id,v){const b=$(id);b.textContent=v;b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}
+    function scored(ok){sc.t++;if(ok){sc.r++;sc.s++}else sc.s=0;
+      if(sc.s>sc.best){sc.best=sc.s;try{localStorage.setItem("ft-best",sc.best)}catch(e){}bump("#bs",sc.best)}
+      bump("#sc",sc.r+"/"+sc.t);bump("#st",sc.s)}
+    $("#bs").textContent=sc.best;
+    function round(first){
+      locked=false;ch.innerHTML="";F.clear("sel","hl","ok","bad","show");
+      $$('[data-m]').forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===mode)));
+      if(mode==="random"){
+        F.setSecret(false);all.hidden=false;
+        F.place([0,...shuffle(range(22).slice(1)).slice(0,8)],first?delay:0);
+        pr.textContent="Tap any fielder to see his position.";
+        setCap("Fig. 7","Random field","A keeper and eight others. Tap a dot to reveal the name, or show them all.");
+      }else{
+        F.setSecret(true);all.hidden=true;F.place(range(22),first?delay:0);
+        target=rnd(22);
+        if(mode==="name"){
+          F.cls(target,"hl");pr.innerHTML="What is the <em>highlighted</em> position called?";
+          const same=shuffle(range(22).filter(i=>i!==target&&POS[i].z===POS[target].z));
+          const pool=same.length>=3?same:shuffle(range(22).filter(i=>i!==target));
+          shuffle([target,...pool.slice(0,3)]).forEach(i=>{const b=document.createElement("button");b.textContent=POS[i].n;b.onclick=()=>pick(i,b);ch.appendChild(b)});
+        }else pr.innerHTML=`Tap <em>${POS[target].n}</em>.`;
+        setCap("Fig. 7",lefty?"Left-handed batter":"Right-handed batter","All 22 positions are on the field. Answer to see the position explained here.");
+      }
+    }
+    function explain(){setCap("Fig. 7 · "+POS[target].s,POS[target].n,POS[target].d)}
+    function tap(i){
+      if(mode==="random"){F.clear("sel");F.cls(i,"sel");F.cls(i,"show");F.ball(i);target=i;explain();return}
+      if(mode!=="find"||locked)return;locked=true;F.setSecret(false);
+      F.cls(i,"show");F.cls(target,"show");F.cls(target,"ok");F.ball(target);
+      if(i===target)pr.innerHTML=`<span class="ok">Caught it.</span> That is ${POS[i].n}.`;
+      else{F.cls(i,"bad");pr.innerHTML=`<span class="bad">That was ${POS[i].n}.</span> ${POS[target].n} is the green dot.`}
+      scored(i===target);explain();
+    }
+    function pick(i,b){
+      if(locked)return;locked=true;F.setSecret(false);
+      [...ch.children].forEach(x=>{if(x.textContent===POS[target].n)x.classList.add("right")});
+      F.cls(target,"hl",false);F.cls(target,"ok");F.cls(target,"show");F.ball(target);
+      if(i===target)pr.innerHTML='<span class="ok">Caught it.</span>';
+      else{b.classList.add("wrong");pr.innerHTML=`<span class="bad">Dropped.</span> It is ${POS[target].n}.`}
+      scored(i===target);explain();
+    }
+    $$('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;round()});
+    $("#nx").onclick=()=>round();
+    all.onclick=()=>F.showAll(true);
+    hand.onclick=()=>{lefty=!lefty;hand.setAttribute("aria-pressed",lefty);F.setMirror(lefty)};
+    round(true);
+  }}
+];
+
+/* ---------- book mechanics ---------- */
+const book=$("#book"),spread=$("#spread"),pL=$("#pL"),pR=$("#pR"),tabs=$("#tabs");
+let cur=0,busy=false;
+try{const s=+localStorage.getItem("ft-page");if(s>=0&&s<PAGES.length)cur=s}catch(e){}
+tabs.innerHTML=PAGES.map((p,i)=>`<button class="tab" data-p="${i}">${p.tab}</button>`).join("");
+$$(".tab").forEach(b=>b.onclick=()=>go(+b.dataset.p));
+
+function render(delay){
+  const p=PAGES[cur];
+  spread.classList.toggle("cover",cur===0);
+  pL.innerHTML=`<div class="rh"><span>Field Trainer</span><span>${p.tab}</span></div>${p.left()}<span class="folio">${cur*2+1}</span>`;
+  pR.innerHTML=`<div class="rh"><span>${p.title}</span></div>${p.right()}<span class="folio">${cur*2+2}</span>`;
+  p.init(delay);
+  $$(".tab").forEach(b=>b.setAttribute("aria-current",String(+b.dataset.p===cur)));
+  const t=$(`.tab[data-p="${cur}"]`);if(t)tabs.scrollLeft=t.offsetLeft-tabs.clientWidth/2+t.clientWidth/2;
+  const pv=$("#prev"),nx=$("#next");
+  pv.disabled=cur===0;nx.disabled=cur===PAGES.length-1;
+  pv.textContent=cur>0?"← "+PAGES[cur-1].tab:"← Back";
+  nx.textContent=cur<PAGES.length-1?PAGES[cur+1].tab+" →":"The end";
+  $("#count").textContent=`Pages ${cur*2+1}–${cur*2+2} of ${PAGES.length*2}`;
+  try{localStorage.setItem("ft-page",cur)}catch(e){}
+}
+
+function go(n){
+  if(n<0||n>=PAGES.length||n===cur||busy)return;
+  const fwd=n>cur,wide=matchMedia("(min-width: 860px)").matches;
+  if(reduced()){cur=n;render(0);return}
+  busy=true;
+  const B=book.getBoundingClientRect();
+  const box=el=>{const r=el.getBoundingClientRect();return{left:r.left-B.left+"px",top:r.top-B.top+"px",width:r.width+"px",height:r.height+"px"}};
+  const snap=el=>{const c=el.cloneNode(true);c.removeAttribute("id");c.setAttribute("aria-hidden","true");return c};
+  const done=els=>{els.forEach(e=>e.remove());busy=false};
+
+  if(!wide){
+    const s=snap(spread);s.classList.add("ov");Object.assign(s.style,box(spread),{transformOrigin:fwd?"left center":"right center"});
+    book.appendChild(s);
+    cur=n;render(250);
+    if(book.getBoundingClientRect().top<0)window.scrollTo({top:window.scrollY+book.getBoundingClientRect().top-12,behavior:"smooth"});
+    s.animate([{transform:"rotateY(0deg)",opacity:1},{transform:`rotateY(${fwd?-85:85}deg)`,opacity:0}],{duration:600,easing:"cubic-bezier(.45,.05,.3,1)"}).onfinish=()=>done([s]);
+    return;
+  }
+  const rL=box(pL),rR=box(pR);
+  const still=snap(fwd?pL:pR);still.classList.add("ov");Object.assign(still.style,fwd?rL:rR);
+  const front=snap(fwd?pR:pL);
+  cur=n;render(fwd?250:850);
+  const back=snap(fwd?pL:pR);
+  const leaf=document.createElement("div");leaf.className="ov leaf";
+  Object.assign(leaf.style,fwd?rR:rL,{transformOrigin:fwd?"left center":"right center"});
+  [front,back].forEach((f,k)=>{f.classList.add("face");if(k)f.classList.add("back");const sh=document.createElement("div");sh.className="shade";f.appendChild(sh);leaf.appendChild(f)});
+  book.append(still,leaf);
+  const T=900,E="cubic-bezier(.45,.05,.25,1)";
+  leaf.animate([{transform:"rotateY(0deg)"},{transform:`rotateY(${fwd?-180:180}deg)`}],{duration:T,easing:E}).onfinish=()=>done([still,leaf]);
+  front.querySelector(".shade").animate([{opacity:0},{opacity:.35}],{duration:T/2,easing:E,fill:"forwards"});
+  back.querySelector(".shade").animate([{opacity:.35},{opacity:0}],{duration:T/2,delay:T/2,easing:E,fill:"both"});
+}
+
+$("#prev").onclick=()=>go(cur-1);
+$("#next").onclick=()=>go(cur+1);
+document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("input,textarea"))return;if(e.key==="ArrowRight")go(cur+1);if(e.key==="ArrowLeft")go(cur-1)});
+let tx=null,ty=null;
+book.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+book.addEventListener("touchend",e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;tx=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(cur+(dx<0?1:-1))},{passive:true});
+
+render(150);
+</script>
+</body>
+</html>
